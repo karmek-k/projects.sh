@@ -28,14 +28,31 @@ or edit this script and set a command for editing"
     $MY_EDITOR "$PROJECT_PATH"
 }
 
-# list project directory if no project provided
-if [ -z "$PROJECT" ]; then
+latest_commit_time() {
+    git -C "$1" log -n 1 --date relative --pretty='%ad' 2>/dev/null
+
+    return $?
+}
+
+list_projects() {
     if [ -z "$MY_PROJECT_DIR" ]; then
         die "Please provide the \`MY_PROJECT_DIR\` env variable"
         exit 1
     fi
 
-    ls -1 "$MY_PROJECT_DIR"
+    for PROJECT in "$MY_PROJECT_DIR"/*; do
+        NAME=$(basename "$PROJECT")
+        COMMIT_TIME=$(latest_commit_time "$PROJECT")
+
+        printf "%-25s%s\n" "$NAME" "$COMMIT_TIME"
+
+        
+    done
+}
+
+# list project directory if no project provided
+if [ -z "$PROJECT" ]; then
+    list_projects
     exit
 fi
 
